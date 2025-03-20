@@ -1,47 +1,50 @@
 ﻿open System
 
-// Определение типа бинарного дерева
+// Определение типа дерева
 type Tree =
-    | Node of string * Tree * Tree  // Узел: значение (строка), левое поддерево, правое поддерево
-    | Empty                        // Пустой узел
+    | Node of string * Tree * Tree 
+    | Empty                        
 
 // Функция fold для дерева
 let rec treeFold f acc tree =
     match tree with
     | Node(data, left, right) ->
-        // Применяем f к текущему значению и аккумулятору
         let newAcc = f data acc
-        // Рекурсивно сворачиваем левое и правое поддеревья
         treeFold f (treeFold f newAcc left) right
-    | Empty -> acc  // База рекурсии: возвращаем аккумулятор
+    | Empty -> acc  
 
-// Функция для поиска элемента в дереве (без учёта регистра)
+// Поиск элемента в дереве (игнорируя регистр)
 let containsElementIgnoreCase tree target =
-    let targetLower = (target : string).ToLower()  // Приводим искомое значение к нижнему регистру
+    let targetLower = (target : string).ToLower()  
     treeFold (fun x acc -> acc || x.ToLower() = targetLower) false tree
 
-// Создание бинарного дерева
-let zodiacTree =
-    Node("Овен",
-        Node("Телец",
-            Node("Близнецы", Empty, Empty),  
-            Node("Рак", Empty, Empty)  
-        ),
-        Node("Лев",
-            Node("Дева", Empty, Empty),
-            Empty
-        )
-    )
+// Функция для ввода дерева с клавиатуры
+let rec inputTree () =
+    printfn "Введите знак зодиака (или 'stop' для завершения ввода):"
+    let input = Console.ReadLine()
+    if input = "stop" then
+        Empty
+    else
+        printfn "Введите левое поддерево для знака '%s':" input
+        let left = inputTree ()
+        printfn "Введите правое поддерево для знака '%s':" input
+        let right = inputTree ()
+        Node(input, left, right)
 
-// Ввод данных от пользователя
-printfn "Введите знак зодиака, относящийся к северным:"
-let userInput = Console.ReadLine()
+// Основная программа
+[<EntryPoint>]
+let main argv =
+    printfn "Введите дерево знаков зодиака:"
+    let tree = inputTree ()  
 
-// Поиск элемента в дереве (без учёта регистра)
-let isFound = containsElementIgnoreCase zodiacTree userInput
+    printfn "\nВведите знак зодиака, который хотите найти:"
+    let userInput = Console.ReadLine()
 
-// Вывод результата
-if isFound then
-    printfn "Знак зодиака '%s' найден в дереве." userInput
-else
-    printfn "Знак зодиака '%s' не найден в дереве." userInput
+    
+    let isFound = containsElementIgnoreCase tree userInput
+    if isFound then
+        printfn "Знак зодиака '%s' найден в дереве." userInput
+    else
+        printfn "Знак зодиака '%s' не найден в дереве." userInput
+
+    0 // Возвращаем код завершения программы
